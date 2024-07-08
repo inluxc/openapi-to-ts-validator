@@ -28,9 +28,8 @@ export function generateCompileBasedDecoders(
     .replace(
       /\$Formats/g,
       addFormats
-        ? `addFormats(ajv, ${
-            formatOptions ? JSON.stringify(formatOptions) : "undefined"
-          });`
+        ? `addFormats(ajv, ${formatOptions ? JSON.stringify(formatOptions) : "undefined"
+        });`
         : ""
     )
     .replace(/\$ModelImports/g, definitionNames.join(", "))
@@ -55,9 +54,9 @@ import { validateJson } from './validate';
 import { $ModelImports } from './models';
 import jsonSchema from './schema.json';
 
-const ajv = new Ajv({ strict: false });
-ajv.compile(jsonSchema);
+export const ajv = new Ajv({ strict: false });
 $Formats
+export const ajv = new Ajv({ strict: false });
 
 // Decoders
 $Decoders
