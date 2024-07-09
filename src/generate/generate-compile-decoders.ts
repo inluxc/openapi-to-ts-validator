@@ -1,44 +1,47 @@
-import type { format, Options } from "prettier";
+import * as prettier from "prettier";
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { createDecoderName } from "./generation-utils";
 import type { FormatsPluginOptions } from "ajv-formats";
 
 export function generateCompileBasedDecoders(
-  definitionNames: string[],
-  addFormats: boolean,
-  formatOptions: FormatsPluginOptions | undefined,
-  outDirs: string[],
-  prettierOptions: Options
+	definitionNames: string[],
+	addFormats: boolean,
+	formatOptions: FormatsPluginOptions | undefined,
+	outDirs: string[],
+	prettierOptions: prettier.Options,
 ): void {
-  const decoders = definitionNames
-    .map((definitionName) =>
-      decoderTemplate
-        .replace(/\$DecoderName/g, createDecoderName(definitionName))
-        .replace(/\$Class/g, definitionName)
-        .trim()
-    )
-    .join("\n");
+	const decoders = definitionNames
+		.map((definitionName) =>
+			decoderTemplate
+				.replace(/\$DecoderName/g, createDecoderName(definitionName))
+				.replace(/\$Class/g, definitionName)
+				.trim(),
+		)
+		.join("\n");
 
-  const rawDecoderOutput = decodersFileTemplate
-    .replace(
-      /\$Imports/g,
-      addFormats ? 'import addFormats from "ajv-formats"' : ""
-    )
-    .replace(
-      /\$Formats/g,
-      addFormats
-        ? `addFormats(ajv, ${formatOptions ? JSON.stringify(formatOptions) : "undefined"
-        });`
-        : ""
-    )
-    .replace(/\$ModelImports/g, definitionNames.join(", "))
-    .replace(/\$Decoders/g, decoders);
+	const rawDecoderOutput = decodersFileTemplate
+		.replace(
+			/\$Imports/g,
+			addFormats ? 'import addFormats from "ajv-formats"' : "",
+		)
+		.replace(
+			/\$Formats/g,
+			addFormats
+				? `addFormats(ajv, ${
+						formatOptions ? JSON.stringify(formatOptions) : "undefined"
+					});`
+				: "",
+		)
+		.replace(/\$ModelImports/g, definitionNames.join(", "))
+		.replace(/\$Decoders/g, decoders);
 
-  for (const outDir of outDirs) {
-    mkdirSync(outDir, { recursive: true });
-    writeFileSync(path.join(outDir, "decoders.ts"), rawDecoderOutput);
-  }
+	const decoderOutput = prettier.format(rawDecoderOutput, prettierOptions);
+
+	for (const outDir of outDirs) {
+		mkdirSync(outDir, { recursive: true });
+		writeFileSync(path.join(outDir, "decoders.ts"), decoderOutput);
+	}
 }
 
 const decodersFileTemplate = `

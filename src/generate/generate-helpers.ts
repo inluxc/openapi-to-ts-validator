@@ -1,17 +1,17 @@
-import { format, Options } from "prettier";
-import { writeFileSync, mkdirSync } from "fs";
-import path from "path";
+import * as prettier from "prettier";
+import { writeFileSync, mkdirSync } from "node:fs";
+import path from "node:path";
 
 export function generateHelpers(
-  prettierOptions: Options,
-  outDirs: string[]
+	prettierOptions: prettier.Options,
+	outDirs: string[],
 ) {
-  const helpers = format(helpersTemplate, prettierOptions);
+	const helpers = prettier.format(helpersTemplate, prettierOptions);
 
-  outDirs.forEach((outDir) => {
-    mkdirSync(outDir, { recursive: true });
-    writeFileSync(path.join(outDir, `helpers.ts`), helpers);
-  });
+	for (const outDir of outDirs) {
+		mkdirSync(outDir, { recursive: true });
+		writeFileSync(path.join(outDir, "helpers.ts"), helpers);
+	}
 }
 
 const helpersTemplate = `

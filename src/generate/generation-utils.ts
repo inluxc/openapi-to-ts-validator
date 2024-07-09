@@ -1,7 +1,7 @@
 export function createValidatorName(definitionName: string) {
-  return `${definitionName}Validator`;
+	return `${definitionName}Validator`;
 }
 
 export function createDecoderName(definitionName: string) {
-  return `${definitionName}Decoder`;
+	return `${definitionName}Decoder`;
 }

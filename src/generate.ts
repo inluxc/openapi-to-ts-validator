@@ -1,6 +1,6 @@
 import keyby from "lodash.keyby";
 import { parseSchema } from "./parse-schema";
-import { GenerateOptions } from "./GenerateOptions";
+import type { GenerateOptions } from "./GenerateOptions";
 import { generateMetaFile } from "./generate/generate-meta";
 import { generateCompileBasedDecoders } from "./generate/generate-compile-decoders";
 import {
@@ -83,7 +83,12 @@ export async function generate(options: GenerateOptions) {
   generateHelpers(prettierOptions, directories);
 
   if (options.skipMetaFile !== true) {
-    generateMetaFile(allDefinitions, directories, prettierOptions, options.esm ?? false);
+    generateMetaFile(
+      allDefinitions,
+      directories,
+      prettierOptions,
+      options.esm ?? false
+    );
   }
 
   console.info(`Successfully generated files for ${schemaFile}`);
