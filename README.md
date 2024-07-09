@@ -226,3 +226,12 @@ object({ title: string() })
 
 ### generate
 `generate` can be called with [GenerateOptions](src/GenerateOptions.ts). See the file for more info.
+
+## Contributers
+- Q42 (https://github.com/Q42) | Forked from https://github.com/Q42/openapi-typescript-validator
+
+- Fejes Márk (https://github.com/markfejes) | Added support for external references
+
+- szabolcsnagy (https://github.com/szabolcsnagy) | Fix AJV order of formats
+
+- Arnd Issler (https://github.com/arndissler) | Prettier update
