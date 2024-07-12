@@ -1,7 +1,7 @@
-import path from "path";
-import fs from "fs";
+import path from "node:path";
+import fs from "node:fs";
 import { generate } from "openapi-typescript-validator";
-import Ajv from 'ajv';
+import Ajv from "ajv";
 
 describe("compose-schema", () => {
   const name = "compose";
@@ -9,14 +9,15 @@ describe("compose-schema", () => {
   const schemaDir = path.join(__dirname, "../schemas");
 
   beforeAll(async () => {
-    if (fs.existsSync(generatedDir)) fs.rmdirSync(generatedDir, { recursive: true });
+    if (fs.existsSync(generatedDir))
+      fs.rmdirSync(generatedDir, { recursive: true });
     await generate({
       schemaFile: path.join(schemaDir, "compose-schema.js"),
       schemaType: "custom",
       directory: generatedDir,
-      decoders: ['BarComponent', 'FooComponent', 'notfound'],
+      decoders: ["BarComponent", "FooComponent", "notfound"],
       standalone: {
-        validatorOutput: 'module',
+        validatorOutput: "module",
       },
     });
   });
@@ -39,7 +40,7 @@ describe("compose-schema", () => {
       "meta.ts",
       "models.ts",
       "schema.json",
-      "validate.ts"
+      "validate.ts",
     ]);
   });
 
@@ -48,11 +49,7 @@ describe("compose-schema", () => {
 
     test("file structure", () => {
       const dir = fs.readdirSync(decodersDir);
-      expect(dir).toEqual([
-        "BarComponent",
-        "FooComponent",
-        "index.ts",
-      ]);
+      expect(dir).toEqual(["BarComponent", "FooComponent", "index.ts"]);
     });
 
     test("index.ts", () => {
@@ -62,10 +59,7 @@ describe("compose-schema", () => {
   });
 
   test("models should match", () => {
-    const file = fs.readFileSync(
-      path.join(generatedDir, `models.ts`),
-      "utf8"
-    );
+    const file = fs.readFileSync(path.join(generatedDir, `models.ts`), "utf8");
     expect(file).not.toBeUndefined();
     expect(file).toMatchSnapshot();
   });

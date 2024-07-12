@@ -1,7 +1,7 @@
-import path from "path";
-import fs from "fs";
+import path from "node:path";
+import fs from "node:fs";
 import { generate } from "openapi-typescript-validator";
-import Ajv from 'ajv';
+import Ajv from "ajv";
 
 describe("format-schema - compile based", () => {
   const name = "format";
@@ -27,7 +27,7 @@ describe("format-schema - compile based", () => {
       "meta.ts",
       "models.ts",
       "schema.json",
-      "validate.ts"
+      "validate.ts",
     ]);
   });
 
@@ -113,7 +113,7 @@ describe("format-schema - standalone", () => {
       "meta.ts",
       "models.ts",
       "schema.json",
-      "validate.ts"
+      "validate.ts",
     ]);
   });
 
@@ -124,7 +124,9 @@ describe("format-schema - standalone", () => {
         "utf8"
       );
       expect(file).not.toBeUndefined();
-      expect(file).toContain(`require("ajv-formats/dist/formats").fullFormats.date`);
+      expect(file).toContain(
+        `require("ajv-formats/dist/formats").fullFormats.date`
+      );
     });
   });
 });

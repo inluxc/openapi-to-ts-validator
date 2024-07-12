@@ -1,4 +1,4 @@
-# openapi-typescript-validator
+# openapi-to-ts-validator
 Generate typescript with `ajv >= 8.0.0` validation based on openapi schemas
 
 - [What does this do?](#what-does-this-do)

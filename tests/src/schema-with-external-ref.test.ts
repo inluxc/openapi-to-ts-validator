@@ -1,5 +1,5 @@
-import path from "path";
-import fs from "fs";
+import path from "node:path";
+import fs from "node:fs";
 import { generate } from "openapi-typescript-validator";
 
 describe("schema-with-external-ref", () => {
@@ -12,12 +12,11 @@ describe("schema-with-external-ref", () => {
       fs.rmdirSync(generatedDir, { recursive: true });
   });
 
-  test('schema with external ref', async () => {
+  test("schema with external ref", async () => {
     await generate({
       schemaFile: path.join(schemaDir, "schema-with-external-ref.yaml"),
       schemaType: "yaml",
-      directory: generatedDir
+      directory: generatedDir,
     });
   });
-
 });

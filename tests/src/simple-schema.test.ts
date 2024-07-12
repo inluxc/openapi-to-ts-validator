@@ -1,7 +1,7 @@
-import path from "path";
-import fs from "fs";
+import path from "node:path";
+import fs from "node:fs";
 import { generate } from "openapi-typescript-validator";
-import Ajv from 'ajv';
+import Ajv from "ajv";
 
 describe("simple-schema", () => {
   const name = "simple";
@@ -9,22 +9,20 @@ describe("simple-schema", () => {
   const schemaDir = path.join(__dirname, "../schemas");
 
   beforeAll(async () => {
-    if (fs.existsSync(generatedDir)) fs.rmdirSync(generatedDir, { recursive: true });
+    if (fs.existsSync(generatedDir))
+      fs.rmdirSync(generatedDir, { recursive: true });
     await generate({
       schemaFile: path.join(schemaDir, "simple-schema.yaml"),
       schemaType: "yaml",
       directory: generatedDir,
       standalone: {
-        validatorOutput: 'module',
-      }
+        validatorOutput: "module",
+      },
     });
   });
 
   test("meta.ts", () => {
-    const file = fs.readFileSync(
-      path.join(generatedDir, `meta.ts`),
-      "utf8"
-    );
+    const file = fs.readFileSync(path.join(generatedDir, `meta.ts`), "utf8");
     expect(file).not.toBeUndefined();
     expect(file).toMatchSnapshot();
   });
@@ -39,13 +37,10 @@ describe("simple-schema", () => {
     expect(await new Ajv().validateSchema(JSON.parse(file))).toEqual(true);
   });
 
-  test('helpers.ts', () => {
-    const file = fs.readFileSync(
-      path.join(generatedDir, `helpers.ts`),
-      "utf8"
-    );
+  test("helpers.ts", () => {
+    const file = fs.readFileSync(path.join(generatedDir, `helpers.ts`), "utf8");
     expect(file).toMatchSnapshot();
-  })
+  });
 
   test("validate.ts", () => {
     const file = fs.readFileSync(
@@ -53,7 +48,7 @@ describe("simple-schema", () => {
       "utf8"
     );
     expect(file).toMatchSnapshot();
-  })
+  });
 
   describe("decoders", () => {
     const decodersDir = path.join(generatedDir, `decoders`);
@@ -63,13 +58,10 @@ describe("simple-schema", () => {
       expect(dir).toEqual(["User", "index.ts"]);
     });
 
-    test('index.ts', () => {
-      const file = fs.readFileSync(
-        path.join(decodersDir, `index.ts`),
-        "utf8"
-      );
+    test("index.ts", () => {
+      const file = fs.readFileSync(path.join(decodersDir, `index.ts`), "utf8");
       expect(file).toMatchSnapshot();
-    })
+    });
 
     describe("UserDecoder", () => {
       const userDecoderDir = path.join(decodersDir, `User`);
@@ -109,10 +101,7 @@ describe("simple-schema", () => {
   });
 
   test("models should match", () => {
-    const file = fs.readFileSync(
-      path.join(generatedDir, `models.ts`),
-      "utf8"
-    );
+    const file = fs.readFileSync(path.join(generatedDir, `models.ts`), "utf8");
     expect(file).not.toBeUndefined();
     expect(file).toMatchSnapshot();
   });

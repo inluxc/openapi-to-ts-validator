@@ -55,5 +55,5 @@ function errorsText(errors: ErrorObject[], jsonPreviewStr: Object): string {
       const errorPayload = tagPath.replace(\`\.\${ fieldName[fieldName.length - 1] } \`\, "");
       return \`\${ error.instancePath }: \${ error.message } | value returned: \${ JSONbuffer.valueForKeyPath(tagPath) } .JSON: \${ JSON.stringify(JSONbuffer.valueForKeyPath(errorPayload)) } \`\;
     })
-    .join("\n");
+    .join(\`\\n\`\);
 }`;
