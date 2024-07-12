@@ -1,6 +1,6 @@
 {
-  "name": "openapi-typescript-validator",
-  "version": "4.0.1",
+  "name": "openapi-to-ts-validator",
+  "version": "1.0.0",
   "description": "Generate typescript with ajv validation based on openapi schemas",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,7 +26,7 @@
     "validate",
     "json"
   ],
-  "author": "Q42",
+  "author": "Inluxc",
   "license": "MIT",
   "repository": {
     "type": "git",
