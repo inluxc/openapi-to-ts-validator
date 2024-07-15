@@ -16,7 +16,6 @@ export function generateAjvValidator(
 const helpersTemplate = `
 /* eslint-disable */
 import type { ErrorObject } from "ajv";
-import{  lazyParse } from 'simdjson';
 
 export interface Validator {
   (json: unknown): boolean;
@@ -47,13 +46,13 @@ export function validateJson(
 
 function errorsText(errors: ErrorObject[], jsonPreviewStr: Object): string {
 
-  const JSONbuffer = lazyParse(jsonPreviewStr.toString()); // external (C++) parsed JSON object
+  const JSONbuffer = JSON.parse(jsonPreviewStr.toString()); // external (C++) parsed JSON object
   return errors
     .map((error)=> {
       const fieldName = error.instancePath.split("/");
       const tagPath = fieldName.join(".").substring(1);
       const errorPayload = tagPath.replace(\`\.\${ fieldName[fieldName.length - 1] } \`\, "");
-      return \`\${ error.instancePath }: \${ error.message } | value returned: \${ JSONbuffer.valueForKeyPath(tagPath) } .JSON: \${ JSON.stringify(JSONbuffer.valueForKeyPath(errorPayload)) } \`\;
+      return \`\${ error.instancePath }: \${ error.message } \\n Returned: \${ JSON.stringify(JSONbuffer) } \`\;
     })
     .join(\`\\n\`\);
 }`;
