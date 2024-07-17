@@ -1,12 +1,12 @@
-import * as prettier from "prettier";
-import { writeFileSync, mkdirSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import * as prettier from "prettier";
 
-export function generateAjvValidator(
+export async function generateAjvValidator(
   prettierOptions: prettier.Options,
   outDirs: string[]
 ) {
-  const helpers = prettier.format(helpersTemplate, prettierOptions);
+  const helpers = await prettier.format(helpersTemplate, prettierOptions);
 
   for (const outDir of outDirs) {
     mkdirSync(outDir, { recursive: true });

@@ -1,9 +1,9 @@
+import { compile } from "json-schema-to-typescript";
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { compile } from "json-schema-to-typescript";
 import * as prettier from "prettier";
-import type { ParsedSchema } from "../parse-schema";
 import type { GenerateOptions } from "../GenerateOptions";
+import type { ParsedSchema } from "../parse-schema";
 
 export async function generateModels(
   schema: ParsedSchema,
@@ -20,7 +20,7 @@ export async function generateModels(
     .replace(/\s*\[k: string\]: unknown;/g, "") // Allow additional properties in schema but not in typescript
     .replace(/export interface Schema \{[^]*?\n\}/, "");
 
-  const typescriptModels = prettier.format(
+  const typescriptModels = await prettier.format(
     rawTypescriptModels,
     prettierOptions
   );
