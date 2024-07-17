@@ -16,7 +16,7 @@ export const UserDecoder: Decoder<User> = {
     return validateJson(
       json,
       UserValidator as Validator,
-      UserDecoder.definitionName
+      UserDecoder.definitionName,
     );
   },
 };
@@ -41,7 +41,7 @@ const schema12 = {
 };
 function validate11(
   data,
-  { instancePath = "", parentData, parentDataProperty, rootData = data } = {}
+  { instancePath = "", parentData, parentDataProperty, rootData = data } = {},
 ) {
   let vErrors = null;
   let errors = 0;
@@ -211,7 +211,7 @@ export interface Validator {
 export function validateJson(
   json: any,
   validator: Validator,
-  definitionName: string
+  definitionName: string,
 ): any {
   const jsonObject = typeof json === "string" ? JSON.parse(json) : json;
 
@@ -223,12 +223,12 @@ export function validateJson(
     typeof json === "string" ? json : JSON.stringify(jsonObject);
   if (validator.errors) {
     throw Error(
-      \`\${definitionName} \${errorsText(validator.errors, jsonPreviewStr)}\`
+      \`\${definitionName} \${errorsText(validator.errors, jsonPreviewStr)}\`,
     );
   }
 
   throw Error(
-    \`\${definitionName} Unexpected data received.JSON: \${jsonPreviewStr} \`
+    \`\${definitionName} Unexpected data received.JSON: \${jsonPreviewStr} \`,
   );
 }
 
@@ -240,11 +240,9 @@ function errorsText(errors: ErrorObject[], jsonPreviewStr: Object): string {
       const tagPath = fieldName.join(".").substring(1);
       const errorPayload = tagPath.replace(
         \`.\${fieldName[fieldName.length - 1]} \`,
-        ""
+        "",
       );
-      return \`\${error.instancePath}: \${
-        error.message
-      } \\n Returned: \${JSON.stringify(JSONbuffer)} \`;
+      return \`\${error.instancePath}: \${error.message} \\n Returned: \${JSON.stringify(JSONbuffer)} \`;
     })
     .join(\`\\n\`);
 }

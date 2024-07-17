@@ -1,6 +1,6 @@
 import path from "node:path";
 import fs from "node:fs";
-import { generate } from "openapi-typescript-validator";
+import { generate } from "openapi-to-ts-validator";
 import Ajv from "ajv";
 
 describe("custom-schema - standalone ES6", () => {
@@ -10,7 +10,7 @@ describe("custom-schema - standalone ES6", () => {
 
   beforeAll(async () => {
     if (fs.existsSync(generatedDir))
-      fs.rmdirSync(generatedDir, { recursive: true });
+      fs.rmSync(generatedDir, { recursive: true });
     await generate({
       schemaFile: path.join(schemaDir, "custom-schema.js"),
       schemaType: "custom",
@@ -77,7 +77,7 @@ describe("custom-schema - standalone ES6 merged", () => {
 
   beforeAll(async () => {
     if (fs.existsSync(generatedDir))
-      fs.rmdirSync(generatedDir, { recursive: true });
+      fs.rmSync(generatedDir, { recursive: true });
     await generate({
       schemaFile: path.join(schemaDir, "custom-schema.js"),
       schemaType: "custom",
@@ -150,7 +150,7 @@ describe("custom-schema - ajv compile", () => {
 
   beforeAll(async () => {
     if (fs.existsSync(generatedDir))
-      fs.rmdirSync(generatedDir, { recursive: true });
+      fs.rmSync(generatedDir, { recursive: true });
     await generate({
       schemaFile: path.join(schemaDir, "custom-schema.js"),
       schemaType: "custom",
@@ -208,7 +208,7 @@ describe("custom-schema - standalone commonjs", () => {
 
   beforeAll(async () => {
     if (fs.existsSync(generatedDir))
-      fs.rmdirSync(generatedDir, { recursive: true });
+      fs.rmSync(generatedDir, { recursive: true });
     await generate({
       schemaFile: path.join(schemaDir, "custom-schema.js"),
       schemaType: "custom",
@@ -309,7 +309,7 @@ describe("custom-schema - standalone commonjs merged", () => {
 
   beforeAll(async () => {
     if (fs.existsSync(generatedDir))
-      fs.rmdirSync(generatedDir, { recursive: true });
+      fs.rmSync(generatedDir, { recursive: true });
     await generate({
       schemaFile: path.join(schemaDir, "custom-schema.js"),
       schemaType: "custom",
@@ -372,7 +372,7 @@ describe("custom-schema - no decoders", () => {
 
   beforeAll(async () => {
     if (fs.existsSync(generatedDir))
-      fs.rmdirSync(generatedDir, { recursive: true });
+      fs.rmSync(generatedDir, { recursive: true });
     await generate({
       schemaFile: path.join(schemaDir, "custom-schema.js"),
       schemaType: "custom",

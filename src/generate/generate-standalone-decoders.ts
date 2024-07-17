@@ -42,7 +42,7 @@ export async function generateStandaloneDecoders(
         esm
       );
 
-      let rawDecoderOutput = decoderFileTemplate(esm)
+      const rawDecoderOutput = decoderFileTemplate(esm)
         .replace(/\$DecoderName/g, decoderName)
         .replace(/\$Class/g, definitionName)
         .replace(/\$ValidatorImports/g, validatorImportStatement)
@@ -91,7 +91,6 @@ export async function generateStandaloneDecoders(
   for (const outDir of outDirs) {
     const decoderDir = path.join(outDir, "decoders");
     mkdirSync(decoderDir, { recursive: true });
-
     writeFileSync(path.join(decoderDir, "index.ts"), indexOutput);
   }
 }

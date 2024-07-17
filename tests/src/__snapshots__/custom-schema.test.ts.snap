@@ -35,7 +35,7 @@ export const ImageComponentDecoder: Decoder<ImageComponent> = {
     const schema = ajv.getSchema(ImageComponentDecoder.schemaRef);
     if (!schema) {
       throw new Error(
-        \`Schema \${ImageComponentDecoder.definitionName} not found\`
+        \`Schema \${ImageComponentDecoder.definitionName} not found\`,
       );
     }
     return validateJson(json, schema, ImageComponentDecoder.definitionName);
@@ -49,7 +49,7 @@ export const ListerComponentDecoder: Decoder<ListerComponent> = {
     const schema = ajv.getSchema(ListerComponentDecoder.schemaRef);
     if (!schema) {
       throw new Error(
-        \`Schema \${ListerComponentDecoder.definitionName} not found\`
+        \`Schema \${ListerComponentDecoder.definitionName} not found\`,
       );
     }
     return validateJson(json, schema, ListerComponentDecoder.definitionName);
@@ -415,9 +415,9 @@ exports[`custom-schema - no decoders schema should match 1`] = `
 exports[`custom-schema - standalone ES6 decoders index.ts 1`] = `
 "/* eslint-disable */
 
-export { ScreenDecoder } from \"./Screen/decoder\";
 export { ImageComponentDecoder } from \"./ImageComponent/decoder\";
 export { ListerComponentDecoder } from \"./ListerComponent/decoder\";
+export { ScreenDecoder } from \"./Screen/decoder\";
 "
 `;
 
@@ -441,7 +441,7 @@ export const ScreenDecoder: Decoder<Screen> = {
     return validateJson(
       json,
       ScreenValidator as Validator,
-      ScreenDecoder.definitionName
+      ScreenDecoder.definitionName,
     );
   },
 };
@@ -453,7 +453,7 @@ export const ImageComponentDecoder: Decoder<ImageComponent> = {
     return validateJson(
       json,
       ImageComponentValidator as Validator,
-      ImageComponentDecoder.definitionName
+      ImageComponentDecoder.definitionName,
     );
   },
 };
@@ -465,7 +465,7 @@ export const ListerComponentDecoder: Decoder<ListerComponent> = {
     return validateJson(
       json,
       ListerComponentValidator as Validator,
-      ListerComponentDecoder.definitionName
+      ListerComponentDecoder.definitionName,
     );
   },
 };
@@ -838,7 +838,7 @@ export const ImageComponentDecoder: Decoder<ImageComponent> = {
     return validateJson(
       json,
       ImageComponentValidator as Validator,
-      ImageComponentDecoder.definitionName
+      ImageComponentDecoder.definitionName,
     );
   },
 };
@@ -885,7 +885,7 @@ export const ScreenDecoder: Decoder<Screen> = {
     return validateJson(
       json,
       ScreenValidator as Validator,
-      ScreenDecoder.definitionName
+      ScreenDecoder.definitionName,
     );
   },
 };
@@ -897,7 +897,7 @@ export const ImageComponentDecoder: Decoder<ImageComponent> = {
     return validateJson(
       json,
       ImageComponentValidator as Validator,
-      ImageComponentDecoder.definitionName
+      ImageComponentDecoder.definitionName,
     );
   },
 };
@@ -909,7 +909,7 @@ export const ListerComponentDecoder: Decoder<ListerComponent> = {
     return validateJson(
       json,
       ListerComponentValidator as Validator,
-      ListerComponentDecoder.definitionName
+      ListerComponentDecoder.definitionName,
     );
   },
 };

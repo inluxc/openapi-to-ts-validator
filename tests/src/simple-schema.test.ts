@@ -1,6 +1,6 @@
 import path from "node:path";
 import fs from "node:fs";
-import { generate } from "openapi-typescript-validator";
+import { generate } from "openapi-to-ts-validator";
 import Ajv from "ajv";
 
 describe("simple-schema", () => {
@@ -10,7 +10,7 @@ describe("simple-schema", () => {
 
   beforeAll(async () => {
     if (fs.existsSync(generatedDir))
-      fs.rmdirSync(generatedDir, { recursive: true });
+      fs.rmSync(generatedDir, { recursive: true });
     await generate({
       schemaFile: path.join(schemaDir, "simple-schema.yaml"),
       schemaType: "yaml",

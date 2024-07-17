@@ -1,6 +1,6 @@
 import path from "node:path";
 import fs from "node:fs";
-import { generate } from "openapi-typescript-validator";
+import { generate } from "openapi-to-ts-validator";
 
 describe("schema-with-external-ref", () => {
   const name = "schema-with-external-ref";
@@ -9,7 +9,7 @@ describe("schema-with-external-ref", () => {
 
   beforeAll(async () => {
     if (fs.existsSync(generatedDir))
-      fs.rmdirSync(generatedDir, { recursive: true });
+      fs.rmSync(generatedDir, { recursive: true });
   });
 
   test("schema with external ref", async () => {

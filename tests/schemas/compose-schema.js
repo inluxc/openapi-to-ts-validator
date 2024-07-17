@@ -5,8 +5,8 @@ const {
   compose,
   constant,
   anyOf,
-  nillable
-} = require("openapi-typescript-validator");
+  nillable,
+} = require("openapi-to-ts-validator");
 
 const types = {};
 

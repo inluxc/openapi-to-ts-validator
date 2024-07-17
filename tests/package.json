@@ -20,7 +20,7 @@
     "js-yaml": "^4.0.0",
     "json-schema-to-typescript": "^11.0.2",
     "lodash.keyby": "^4.6.0",
-    "openapi-typescript-validator": "file:..",
+    "openapi-to-ts-validator": "file:..",
     "ts-jest": "^29.2.0"
   },
   "devDependencies": {

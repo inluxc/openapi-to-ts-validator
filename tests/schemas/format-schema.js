@@ -1,4 +1,4 @@
-const { date, object, email, number } = require("openapi-typescript-validator");
+const { date, object, email, number } = require("openapi-to-ts-validator");
 
 const types = {};
 
@@ -13,9 +13,9 @@ types.User = object({
 types.Price = object({
   amount: number({
     minimum: 0,
-    maximum: 999
-  })
-})
+    maximum: 999,
+  }),
+});
 
 module.exports = {
   types,
