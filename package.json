@@ -45,7 +45,7 @@
     "js-yaml": "^4.0.0",
     "json-schema-to-typescript": "^11.0.2",
     "lodash.keyby": "^4.6.0",
-    "openapi-typescript-validator": "github:inluxc/openapi-typescript-validator"
+    "openapi-typescript-validator": "github:inluxc/openapi-to-ts-validator"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
