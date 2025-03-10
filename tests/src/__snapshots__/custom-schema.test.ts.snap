@@ -8,7 +8,7 @@ import Ajv from \"ajv\";
 import type { Decoder } from \"./helpers\";
 import { validateJson } from \"./validate\";
 import type { Screen, ImageComponent, ListerComponent } from \"./models\";
-import jsonSchema from \"./schema.json\";
+import jsonSchema from \"./schema.json\" with { type: "json" };
 
 export const ajv = new Ajv({ strict: false });
 
