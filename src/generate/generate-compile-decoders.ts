@@ -9,21 +9,21 @@ export async function generateCompileBasedDecoders(
   addFormats: boolean,
   formatOptions: FormatsPluginOptions | undefined,
   outDirs: string[],
-  prettierOptions: prettier.Options
+  prettierOptions: prettier.Options,
 ): Promise<void> {
   const decoders = definitionNames
     .map((definitionName) =>
       decoderTemplate
         .replace(/\$DecoderName/g, createDecoderName(definitionName))
         .replace(/\$Class/g, definitionName)
-        .trim()
+        .trim(),
     )
     .join("\n");
 
   const rawDecoderOutput = decodersFileTemplate
     .replace(
       /\$Imports/g,
-      addFormats ? 'import addFormats from "ajv-formats"' : ""
+      addFormats ? 'import addFormats from "ajv-formats"' : "",
     )
     .replace(
       /\$Formats/g,
@@ -31,14 +31,14 @@ export async function generateCompileBasedDecoders(
         ? `addFormats(ajv, ${
             formatOptions ? JSON.stringify(formatOptions) : "undefined"
           });`
-        : ""
+        : "",
     )
     .replace(/\$ModelImports/g, definitionNames.join(", "))
     .replace(/\$Decoders/g, decoders);
 
   const decoderOutput = await prettier.format(
     rawDecoderOutput,
-    prettierOptions
+    prettierOptions,
   );
 
   for (const outDir of outDirs) {
@@ -55,7 +55,7 @@ $Imports
 import type { Decoder } from './helpers';
 import { validateJson } from './validate';
 import type { $ModelImports } from './models';
-import jsonSchema from './schema.json';
+import jsonSchema from './schema.json' with { type: "json" };
 
 export const ajv = new Ajv({ strict: false });
 $Formats
