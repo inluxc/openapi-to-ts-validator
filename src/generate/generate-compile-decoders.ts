@@ -55,7 +55,7 @@ $Imports
 import type { Decoder } from './helpers';
 import { validateJson } from './validate';
 import type { $ModelImports } from './models';
-import jsonSchema from './schema.json' with { type: 'json' };
+import jsonSchema from './schema.json' assert { type: 'json' };
 
 export const ajv = new Ajv({ strict: false });
 $Formats
