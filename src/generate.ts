@@ -20,9 +20,11 @@ export async function generate(options: GenerateOptions) {
       ? [options.directory]
       : options.directory;
 
-  console.info(
-    `Start generating files for ${schemaType} schema: ${schemaFile}`
-  );
+  if (options.debug ?? false) {
+    console.info(
+      `Start generating files for ${schemaType} schema: ${schemaFile}`,
+    );
+  }
 
   const schema = await parseSchema(schemaFile, schemaType);
 
@@ -47,7 +49,7 @@ export async function generate(options: GenerateOptions) {
         options.addFormats ?? false,
         options.formatOptions,
         directories,
-        prettierOptions
+        prettierOptions,
       );
     } else if (options.standalone.mergeDecoders === true) {
       generateStandaloneMergedDecoders(
@@ -58,7 +60,7 @@ export async function generate(options: GenerateOptions) {
         options.esm ? "module" : options.standalone.validatorOutput,
         options.esm ?? false,
         directories,
-        prettierOptions
+        prettierOptions,
       );
     } else {
       generateStandaloneDecoders(
@@ -69,7 +71,7 @@ export async function generate(options: GenerateOptions) {
         options.esm ? "module" : options.standalone.validatorOutput,
         options.esm ?? false,
         directories,
-        prettierOptions
+        prettierOptions,
       );
     }
   }
@@ -78,7 +80,7 @@ export async function generate(options: GenerateOptions) {
     schema,
     { skipSchemaFile: options.skipSchemaFile },
     prettierOptions,
-    directories
+    directories,
   );
   generateHelpers(prettierOptions, directories);
 
@@ -87,9 +89,10 @@ export async function generate(options: GenerateOptions) {
       allDefinitions,
       directories,
       prettierOptions,
-      options.esm ?? false
+      options.esm ?? false,
     );
   }
-
-  console.info(`Successfully generated files for ${schemaFile}`);
+  if (options.debug ?? false) {
+    console.info(`Successfully generated files for ${schemaFile}`);
+  }
 }
