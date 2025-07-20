@@ -1,0 +1,125 @@
+openapi: 3.1.0
+info:
+  title: OpenAPI 3.1 Const Keyword Test Schema
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    StatusResponse:
+      type: object
+      properties:
+        status:
+          const: "success"
+          description: "Always returns success"
+        code:
+          const: 200
+          description: "HTTP status code"
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          const: null
+          description: "No data in this response"
+      required: ['status', 'code']
+    
+    ConfigObject:
+      type: object
+      properties:
+        version:
+          const: "1.0.0"
+          description: "API version"
+        debug:
+          const: false
+          description: "Debug mode flag"
+        maxRetries:
+          const: 3
+          description: "Maximum retry attempts"
+        environment:
+          const: "production"
+          description: "Environment name"
+      required: ['version']
+    
+    ComplexConstExample:
+      type: object
+      properties:
+        metadata:
+          const:
+            type: "response"
+            version: 2
+            features: ["auth", "cache"]
+          description: "Fixed metadata object"
+        tags:
+          const: ["important", "verified", "public"]
+          description: "Fixed array of tags"
+        settings:
+          type: object
+          properties:
+            theme:
+              const: "dark"
+            language:
+              const: "en"
+            notifications:
+              const: true
+          required: ['theme']
+      required: ['metadata']
+    
+    TupleWithConst:
+      type: array
+      prefixItems:
+        - const: "header"
+          description: "Fixed header value"
+        - type: number
+          description: "Variable number"
+        - const: true
+          description: "Fixed boolean flag"
+      items: false
+      description: "Tuple with mixed const and variable items"
+    
+    ConditionalConst:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: ["basic", "premium"]
+        level:
+          type: string
+      if:
+        properties:
+          type:
+            const: "premium"
+      then:
+        properties:
+          level:
+            const: "gold"
+      else:
+        properties:
+          level:
+            const: "standard"
+      required: ['type', 'level']
+    
+    MixedTypesWithConst:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          const: "active"
+        priority:
+          type: ["number", "null"]
+        config:
+          anyOf:
+            - const: "default"
+            - type: object
+              properties:
+                custom:
+                  const: true
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              category:
+                const: "item"
+              value:
+                type: ["string", "number"]
+      required: ['id', 'status']

@@ -1,0 +1,178 @@
+openapi: 3.0.3
+info:
+  title: Comprehensive OpenAPI 3.0 Test Schema
+  version: 1.0.0
+  description: A comprehensive schema to test OpenAPI 3.0 backward compatibility
+paths:
+  /users:
+    get:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserList'
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: User ID
+        name:
+          type: string
+          description: User name
+        email:
+          type: string
+          nullable: true
+          description: User email (nullable in OpenAPI 3.0 style)
+        age:
+          type: integer
+          minimum: 0
+          maximum: 150
+        tags:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+        status:
+          type: string
+          enum: ['active', 'inactive', 'pending']
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+      required: ['id', 'name']
+      
+    UserProfile:
+      type: object
+      properties:
+        bio:
+          type: string
+          nullable: true
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+        preferences:
+          type: object
+          properties:
+            theme:
+              type: string
+              enum: ['light', 'dark']
+            notifications:
+              type: boolean
+          additionalProperties: false
+      
+    UserList:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        total:
+          type: integer
+        page:
+          type: integer
+          default: 1
+      required: ['users', 'total']
+      
+    # Test discriminator in OpenAPI 3.0 style
+    Pet:
+      type: object
+      discriminator:
+        propertyName: petType
+      properties:
+        petType:
+          type: string
+        name:
+          type: string
+      required: ['petType', 'name']
+      
+    Dog:
+      allOf:
+        - $ref: '#/components/schemas/Pet'
+        - type: object
+          properties:
+            breed:
+              type: string
+          required: ['breed']
+              
+    Cat:
+      allOf:
+        - $ref: '#/components/schemas/Pet'
+        - type: object
+          properties:
+            indoor:
+              type: boolean
+          required: ['indoor']
+              
+    # Test complex composition
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+      required: ['street', 'city', 'country']
+      
+    PersonalInfo:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+      required: ['firstName', 'lastName']
+      
+    BusinessInfo:
+      type: object
+      properties:
+        companyName:
+          type: string
+        taxId:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+      required: ['companyName', 'taxId']
+      
+    Contact:
+      oneOf:
+        - $ref: '#/components/schemas/PersonalInfo'
+        - $ref: '#/components/schemas/BusinessInfo'
+        
+    # Test nested objects and arrays
+    Organization:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        departments:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              head:
+                $ref: '#/components/schemas/User'
+            required: ['name']
+        settings:
+          type: object
+          additionalProperties: true
+      required: ['id', 'name']

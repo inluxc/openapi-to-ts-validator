@@ -1,0 +1,47 @@
+openapi: 3.1.0
+info:
+  title: OpenAPI 3.1 Test Schema
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        age:
+          type: ["number", "null"]
+        tags:
+          type: array
+          prefixItems:
+            - type: string
+            - type: number
+          items: false
+        metadata:
+          type: ["object", "null"]
+          properties:
+            created:
+              type: string
+            updated:
+              type: ["string", "null"]
+      required: ['id', 'name']
+    
+    Product:
+      type: object
+      properties:
+        title:
+          type: string
+        price:
+          type: ["number", "string", "null"]
+        available:
+          type: ["boolean", "null"]
+        categories:
+          type: array
+          items:
+            type: ["string", "null"]
+      required: ['title']

@@ -1,0 +1,841 @@
+openapi: 3.1.0
+info:
+  title: E-commerce API
+  version: 3.1.0
+  description: A real-world e-commerce API showcasing OpenAPI 3.1 features
+  contact:
+    name: E-commerce Team
+    email: api@ecommerce.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: https://api.ecommerce.com/v3
+    description: Production server
+  - url: https://staging-api.ecommerce.com/v3
+    description: Staging server
+
+paths:
+  /products:
+    get:
+      summary: List products
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: minPrice
+          in: query
+          schema:
+            type: ["number", "null"]
+            minimum: 0
+      responses:
+        '200':
+          description: Product list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductList'
+
+webhooks:
+  inventoryLow:
+    post:
+      summary: Low inventory alert
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventoryAlert'
+      responses:
+        '200':
+          description: Alert received
+
+  orderStatusChanged:
+    post:
+      summary: Order status change notification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderStatusEvent'
+      responses:
+        '200':
+          description: Status change received
+
+components:
+  schemas:
+    # Product with complex type arrays and conditional logic
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        price:
+          type: number
+          minimum: 0
+        originalPrice:
+          type: ["number", "null"]
+          minimum: 0
+        currency:
+          const: "USD"
+        category:
+          $ref: '#/components/schemas/Category'
+        tags:
+          type: ["array", "null"]
+          items:
+            type: string
+          contains:
+            pattern: "^[a-z-]+$"
+          description: "Must contain at least one lowercase tag"
+        images:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                format: uri
+              alt:
+                type: ["string", "null"]
+              dimensions:
+                type: array
+                prefixItems:
+                  - type: number
+                    description: "Width"
+                  - type: number
+                    description: "Height"
+                items: false
+            required: ['url']
+          minItems: 1
+        inventory:
+          type: object
+          properties:
+            inStock:
+              type: boolean
+            quantity:
+              type: ["number", "null"]
+            lowStockThreshold:
+              type: number
+              minimum: 0
+            locations:
+              type: ["array", "null"]
+              items:
+                type: object
+                properties:
+                  warehouse:
+                    type: string
+                  quantity:
+                    type: number
+                    minimum: 0
+                required: ['warehouse', 'quantity']
+          if:
+            properties:
+              inStock:
+                const: true
+          then:
+            properties:
+              quantity:
+                type: number
+                minimum: 1
+            required: ['quantity']
+          else:
+            properties:
+              quantity:
+                const: 0
+          required: ['inStock', 'lowStockThreshold']
+        variants:
+          type: ["array", "null"]
+          items:
+            $ref: '#/components/schemas/ProductVariant'
+        metadata:
+          type: ["object", "null"]
+          unevaluatedProperties:
+            type: ["string", "number", "boolean"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: ["string", "null"]
+          format: date-time
+      required: ['id', 'name', 'price', 'currency', 'category', 'images', 'inventory', 'createdAt']
+
+    ProductVariant:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        sku:
+          type: ["string", "null"]
+        price:
+          type: ["number", "null"]
+        attributes:
+          type: object
+          properties:
+            color:
+              type: ["string", "null"]
+            size:
+              type: ["string", "null"]
+            material:
+              type: ["string", "null"]
+          unevaluatedProperties:
+            type: string
+        inventory:
+          type: object
+          properties:
+            quantity:
+              type: number
+              minimum: 0
+            reserved:
+              type: number
+              minimum: 0
+          required: ['quantity', 'reserved']
+      required: ['id', 'name', 'inventory']
+
+    Category:
+      type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          physical: '#/components/schemas/PhysicalCategory'
+          digital: '#/components/schemas/DigitalCategory'
+          service: '#/components/schemas/ServiceCategory'
+      oneOf:
+        - $ref: '#/components/schemas/PhysicalCategory'
+        - $ref: '#/components/schemas/DigitalCategory'
+        - $ref: '#/components/schemas/ServiceCategory'
+      required: ['type', 'id', 'name']
+
+    PhysicalCategory:
+      type: object
+      properties:
+        type:
+          const: "physical"
+        id:
+          type: string
+        name:
+          type: string
+        shippingRequired:
+          const: true
+        weightCategory:
+          type: string
+          enum: ["light", "medium", "heavy", "oversized"]
+        dimensions:
+          type: ["object", "null"]
+          properties:
+            maxLength:
+              type: number
+            maxWidth:
+              type: number
+            maxHeight:
+              type: number
+          required: ['maxLength', 'maxWidth', 'maxHeight']
+      required: ['type', 'id', 'name', 'shippingRequired', 'weightCategory']
+
+    DigitalCategory:
+      type: object
+      properties:
+        type:
+          const: "digital"
+        id:
+          type: string
+        name:
+          type: string
+        shippingRequired:
+          const: false
+        deliveryMethod:
+          type: string
+          enum: ["download", "email", "api", "streaming"]
+        fileTypes:
+          type: ["array", "null"]
+          items:
+            type: string
+          contains:
+            pattern: "^[a-z0-9]+$"
+      required: ['type', 'id', 'name', 'shippingRequired', 'deliveryMethod']
+
+    ServiceCategory:
+      type: object
+      properties:
+        type:
+          const: "service"
+        id:
+          type: string
+        name:
+          type: string
+        shippingRequired:
+          const: false
+        duration:
+          type: ["object", "null"]
+          properties:
+            min:
+              type: number
+              minimum: 0
+            max:
+              type: ["number", "null"]
+              minimum: 0
+            unit:
+              type: string
+              enum: ["minutes", "hours", "days", "weeks"]
+          required: ['min', 'unit']
+        location:
+          type: string
+          enum: ["remote", "on-site", "hybrid"]
+      required: ['type', 'id', 'name', 'shippingRequired', 'location']
+
+    # Customer with complex nested structures
+    Customer:
+      type: object
+      properties:
+        id:
+          type: string
+        profile:
+          type: object
+          properties:
+            firstName:
+              type: string
+            lastName:
+              type: string
+            email:
+              type: string
+              format: email
+            phone:
+              type: ["string", "null"]
+              pattern: '^\+?[1-9]\d{1,14}$'
+            dateOfBirth:
+              type: ["string", "null"]
+              format: date
+            preferences:
+              type: ["object", "null"]
+              properties:
+                newsletter:
+                  type: boolean
+                notifications:
+                  type: object
+                  properties:
+                    email:
+                      type: boolean
+                    sms:
+                      type: boolean
+                    push:
+                      type: boolean
+                  required: ['email', 'sms', 'push']
+                language:
+                  type: string
+                  enum: ["en", "es", "fr", "de", "it"]
+                currency:
+                  const: "USD"
+              required: ['newsletter', 'notifications']
+          required: ['firstName', 'lastName', 'email']
+        addresses:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+                enum: ["billing", "shipping", "both"]
+              isDefault:
+                type: boolean
+              address:
+                type: array
+                prefixItems:
+                  - type: string
+                    description: "Street address line 1"
+                  - type: ["string", "null"]
+                    description: "Street address line 2"
+                  - type: string
+                    description: "City"
+                  - type: string
+                    description: "State/Province"
+                  - type: string
+                    description: "Postal code"
+                  - type: string
+                    description: "Country code"
+                items: false
+              coordinates:
+                type: ["array", "null"]
+                prefixItems:
+                  - type: number
+                    description: "Latitude"
+                  - type: number
+                    description: "Longitude"
+                items: false
+            required: ['id', 'type', 'isDefault', 'address']
+        paymentMethods:
+          type: ["array", "null"]
+          items:
+            $ref: '#/components/schemas/PaymentMethod'
+        loyaltyProgram:
+          type: ["object", "null"]
+          properties:
+            tier:
+              type: string
+              enum: ["bronze", "silver", "gold", "platinum"]
+            points:
+              type: number
+              minimum: 0
+            benefits:
+              type: array
+              items:
+                type: string
+              contains:
+                enum: ["free-shipping", "early-access", "exclusive-deals"]
+          if:
+            properties:
+              tier:
+                enum: ["gold", "platinum"]
+          then:
+            properties:
+              benefits:
+                contains:
+                  const: "priority-support"
+          required: ['tier', 'points', 'benefits']
+        createdAt:
+          type: string
+          format: date-time
+        lastActive:
+          type: ["string", "null"]
+          format: date-time
+      required: ['id', 'profile', 'addresses', 'createdAt']
+
+    PaymentMethod:
+      type: object
+      discriminator:
+        propertyName: type
+      anyOf:
+        - $ref: '#/components/schemas/CreditCard'
+        - $ref: '#/components/schemas/DebitCard'
+        - $ref: '#/components/schemas/DigitalWallet'
+        - $ref: '#/components/schemas/BankAccount'
+      required: ['type', 'id', 'isDefault']
+
+    CreditCard:
+      type: object
+      properties:
+        type:
+          const: "CreditCard"
+        id:
+          type: string
+        isDefault:
+          type: boolean
+        lastFour:
+          type: string
+          pattern: '^[0-9]{4}$'
+        brand:
+          type: string
+          enum: ["visa", "mastercard", "amex", "discover"]
+        expiryMonth:
+          type: number
+          minimum: 1
+          maximum: 12
+        expiryYear:
+          type: number
+          minimum: 2024
+        holderName:
+          type: string
+        billingAddress:
+          type: ["string", "null"]
+          description: "Reference to address ID"
+      required: ['type', 'id', 'isDefault', 'lastFour', 'brand', 'expiryMonth', 'expiryYear', 'holderName']
+
+    DebitCard:
+      type: object
+      properties:
+        type:
+          const: "DebitCard"
+        id:
+          type: string
+        isDefault:
+          type: boolean
+        lastFour:
+          type: string
+          pattern: '^[0-9]{4}$'
+        brand:
+          type: string
+          enum: ["visa", "mastercard"]
+        bankName:
+          type: string
+        holderName:
+          type: string
+      required: ['type', 'id', 'isDefault', 'lastFour', 'brand', 'bankName', 'holderName']
+
+    DigitalWallet:
+      type: object
+      properties:
+        type:
+          const: "DigitalWallet"
+        id:
+          type: string
+        isDefault:
+          type: boolean
+        provider:
+          type: string
+          enum: ["paypal", "apple-pay", "google-pay", "amazon-pay"]
+        accountId:
+          type: string
+        verified:
+          type: boolean
+      required: ['type', 'id', 'isDefault', 'provider', 'accountId', 'verified']
+
+    BankAccount:
+      type: object
+      properties:
+        type:
+          const: "BankAccount"
+        id:
+          type: string
+        isDefault:
+          type: boolean
+        accountType:
+          type: string
+          enum: ["checking", "savings"]
+        lastFour:
+          type: string
+          pattern: '^[0-9]{4}$'
+        bankName:
+          type: string
+        routingNumber:
+          type: string
+          pattern: '^[0-9]{9}$'
+      required: ['type', 'id', 'isDefault', 'accountType', 'lastFour', 'bankName', 'routingNumber']
+
+    # Order with comprehensive OpenAPI 3.1 features
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        orderNumber:
+          type: string
+          pattern: '^ORD-[0-9]{8}$'
+        status:
+          type: string
+          enum: ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled", "refunded"]
+        customer:
+          $ref: '#/components/schemas/Customer'
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: string
+              variantId:
+                type: ["string", "null"]
+              quantity:
+                type: number
+                minimum: 1
+              unitPrice:
+                type: number
+                minimum: 0
+              totalPrice:
+                type: number
+                minimum: 0
+              discounts:
+                type: ["array", "null"]
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: ["percentage", "fixed", "bogo", "bulk"]
+                    value:
+                      type: number
+                    description:
+                      type: string
+                  required: ['type', 'value']
+            required: ['productId', 'quantity', 'unitPrice', 'totalPrice']
+          minItems: 1
+        pricing:
+          type: object
+          properties:
+            subtotal:
+              type: number
+              minimum: 0
+            tax:
+              type: number
+              minimum: 0
+            shipping:
+              type: number
+              minimum: 0
+            discounts:
+              type: number
+              minimum: 0
+            total:
+              type: number
+              minimum: 0
+            currency:
+              const: "USD"
+          required: ['subtotal', 'tax', 'shipping', 'discounts', 'total', 'currency']
+        shipping:
+          type: ["object", "null"]
+          properties:
+            method:
+              type: string
+              enum: ["standard", "express", "overnight", "pickup"]
+            address:
+              type: array
+              prefixItems:
+                - type: string
+                - type: ["string", "null"]
+                - type: string
+                - type: string
+                - type: string
+                - type: string
+              items: false
+            trackingNumber:
+              type: ["string", "null"]
+            estimatedDelivery:
+              type: ["string", "null"]
+              format: date
+            actualDelivery:
+              type: ["string", "null"]
+              format: date-time
+          if:
+            properties:
+              method:
+                enum: ["express", "overnight"]
+          then:
+            properties:
+              estimatedDelivery:
+                type: string
+                format: date
+            required: ['estimatedDelivery']
+          required: ['method', 'address']
+        payment:
+          type: object
+          properties:
+            method:
+              $ref: '#/components/schemas/PaymentMethod'
+            status:
+              type: string
+              enum: ["pending", "authorized", "captured", "failed", "refunded"]
+            transactionId:
+              type: ["string", "null"]
+            authorizedAt:
+              type: ["string", "null"]
+              format: date-time
+            capturedAt:
+              type: ["string", "null"]
+              format: date-time
+          required: ['method', 'status']
+        timeline:
+          type: array
+          items:
+            type: object
+            properties:
+              event:
+                type: string
+                enum: ["created", "confirmed", "payment_authorized", "payment_captured", "shipped", "delivered", "cancelled"]
+              timestamp:
+                type: string
+                format: date-time
+              details:
+                type: ["object", "null"]
+                unevaluatedProperties: true
+              actor:
+                type: ["string", "null"]
+                description: "User or system that triggered the event"
+            required: ['event', 'timestamp']
+          contains:
+            properties:
+              event:
+                const: "created"
+          minContains: 1
+          maxContains: 1
+        metadata:
+          type: ["object", "null"]
+          properties:
+            source:
+              type: string
+              enum: ["web", "mobile", "api", "admin"]
+            campaign:
+              type: ["string", "null"]
+            referrer:
+              type: ["string", "null"]
+            userAgent:
+              type: ["string", "null"]
+          unevaluatedProperties:
+            type: ["string", "number", "boolean"]
+          required: ['source']
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: ["string", "null"]
+          format: date-time
+      required: ['id', 'orderNumber', 'status', 'customer', 'items', 'pricing', 'payment', 'timeline', 'createdAt']
+
+    # Webhook event schemas
+    InventoryAlert:
+      type: object
+      properties:
+        eventType:
+          const: "inventory.low"
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          properties:
+            productId:
+              type: string
+            variantId:
+              type: ["string", "null"]
+            currentQuantity:
+              type: number
+              minimum: 0
+            threshold:
+              type: number
+              minimum: 0
+            location:
+              type: ["string", "null"]
+          required: ['productId', 'currentQuantity', 'threshold']
+        severity:
+          type: string
+          enum: ["low", "medium", "high", "critical"]
+        metadata:
+          type: object
+          properties:
+            source:
+              const: "inventory-service"
+            version:
+              const: "1.0"
+          required: ['source', 'version']
+      if:
+        properties:
+          data:
+            properties:
+              currentQuantity:
+                const: 0
+      then:
+        properties:
+          severity:
+            const: "critical"
+      required: ['eventType', 'timestamp', 'data', 'severity', 'metadata']
+
+    OrderStatusEvent:
+      type: object
+      properties:
+        eventType:
+          const: "order.status_changed"
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          properties:
+            orderId:
+              type: string
+            orderNumber:
+              type: string
+            previousStatus:
+              type: string
+            newStatus:
+              type: string
+            customerId:
+              type: string
+            changes:
+              type: ["array", "null"]
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  oldValue:
+                    type: ["string", "number", "boolean", "null"]
+                  newValue:
+                    type: ["string", "number", "boolean", "null"]
+                  timestamp:
+                    type: string
+                    format: date-time
+                required: ['field', 'timestamp']
+          required: ['orderId', 'orderNumber', 'previousStatus', 'newStatus', 'customerId']
+        metadata:
+          type: object
+          properties:
+            source:
+              const: "order-service"
+            version:
+              const: "1.0"
+            triggeredBy:
+              type: ["string", "null"]
+            automated:
+              type: boolean
+          required: ['source', 'version', 'automated']
+      required: ['eventType', 'timestamp', 'data', 'metadata']
+
+    # Collection and response types
+    ProductList:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        pagination:
+          type: object
+          properties:
+            page:
+              type: number
+              minimum: 1
+            limit:
+              type: number
+              minimum: 1
+              maximum: 100
+            total:
+              type: number
+              minimum: 0
+            totalPages:
+              type: number
+              minimum: 0
+            hasNext:
+              type: boolean
+            hasPrevious:
+              type: boolean
+          required: ['page', 'limit', 'total', 'totalPages', 'hasNext', 'hasPrevious']
+        filters:
+          type: ["object", "null"]
+          properties:
+            category:
+              type: ["string", "null"]
+            priceRange:
+              type: ["array", "null"]
+              prefixItems:
+                - type: number
+                  minimum: 0
+                  description: "Minimum price"
+                - type: number
+                  minimum: 0
+                  description: "Maximum price"
+              items: false
+            inStock:
+              type: ["boolean", "null"]
+            tags:
+              type: ["array", "null"]
+              items:
+                type: string
+              contains:
+                type: string
+                minLength: 1
+          unevaluatedProperties: false
+        sorting:
+          type: ["object", "null"]
+          properties:
+            field:
+              type: string
+              enum: ["name", "price", "createdAt", "popularity"]
+            direction:
+              type: string
+              enum: ["asc", "desc"]
+          required: ['field', 'direction']
+      required: ['products', 'pagination']
