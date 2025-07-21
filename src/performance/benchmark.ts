@@ -571,7 +571,7 @@ export class OpenAPI31Benchmark {
             { type: 'number' },
             { type: ['boolean', 'null'] }
           ],
-          items: false
+          items: false as any
         },
         containsArray: {
           type: 'array',

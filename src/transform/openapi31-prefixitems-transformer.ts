@@ -59,7 +59,7 @@ export function transformPrefixItems(schema: JSONSchema): PrefixItemsTransformRe
 
     // Handle additionalItems/items interaction
     if ('items' in transformed) {
-      if (transformed.items === false || (typeof transformed.items === 'boolean' && !transformed.items)) {
+      if ((transformed.items as any) === false) {
         // No additional items allowed - fixed tuple
         tupleInfo.additionalItems = false;
         tupleInfo.maxItems = prefixItems.length;
