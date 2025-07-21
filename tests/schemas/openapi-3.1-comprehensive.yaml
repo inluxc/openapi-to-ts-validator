@@ -1,0 +1,807 @@
+openapi: 3.1.0
+info:
+  title: Comprehensive OpenAPI 3.1 Test API
+  version: 2.0.0
+  description: A comprehensive test schema showcasing all OpenAPI 3.1 features
+  contact:
+    name: Test Team
+    email: test@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.example.com/v2
+    description: Production server
+  - url: https://staging-api.example.com/v2
+    description: Staging server
+
+paths:
+  /users:
+    get:
+      summary: List users
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserList'
+
+webhooks:
+  userCreated:
+    post:
+      summary: User created webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreatedEvent'
+      responses:
+        '200':
+          description: Webhook received successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+
+  orderUpdated:
+    post:
+      summary: Order status updated webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderUpdatedEvent'
+      responses:
+        '200':
+          description: Webhook received successfully
+
+components:
+  schemas:
+    # Basic type arrays (OpenAPI 3.1 null handling)
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique user identifier
+        name:
+          type: string
+          description: User's full name
+        email:
+          type: ["string", "null"]
+          format: email
+          description: User's email address (can be null)
+        age:
+          type: ["number", "null"]
+          minimum: 0
+          maximum: 150
+          description: User's age (can be null)
+        isActive:
+          type: ["boolean", "null"]
+          description: Whether the user is active
+        metadata:
+          type: ["object", "null"]
+          properties:
+            lastLogin:
+              type: ["string", "null"]
+              format: date-time
+            preferences:
+              type: object
+              additionalProperties: true
+        tags:
+          type: ["array", "null"]
+          items:
+            type: string
+      required: ['id', 'name']
+
+    # PrefixItems (tuple types)
+    Coordinates:
+      type: array
+      prefixItems:
+        - type: number
+          description: Latitude
+        - type: number
+          description: Longitude
+        - type: ["number", "null"]
+          description: Altitude (optional)
+      items: false
+      description: Geographic coordinates as [lat, lng, alt?]
+
+    # Complex tuple with mixed types
+    LogEntry:
+      type: array
+      prefixItems:
+        - type: string
+          format: date-time
+          description: Timestamp
+        - type: string
+          enum: ["INFO", "WARN", "ERROR", "DEBUG"]
+          description: Log level
+        - type: string
+          description: Message
+        - type: ["object", "null"]
+          description: Additional context
+          properties:
+            userId:
+              type: ["string", "null"]
+            requestId:
+              type: ["string", "null"]
+      items:
+        type: string
+        description: Additional string parameters
+      minItems: 3
+      maxItems: 10
+
+    # Const keyword usage
+    ApiResponse:
+      type: object
+      properties:
+        version:
+          const: "2.0"
+          description: API version
+        status:
+          const: "success"
+          description: Response status
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: ["object", "array", "null"]
+      required: ['version', 'status', 'timestamp']
+
+    # Complex const with objects and arrays
+    Configuration:
+      type: object
+      properties:
+        environment:
+          const: "production"
+        features:
+          const: ["auth", "logging", "metrics", "cache"]
+        limits:
+          const:
+            maxUsers: 10000
+            maxRequests: 1000000
+            timeout: 30
+        debug:
+          const: false
+      required: ['environment', 'features']
+
+    # Conditional schemas (if/then/else)
+    Account:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: ["basic", "premium", "enterprise"]
+        name:
+          type: string
+        limits:
+          type: object
+          properties:
+            storage:
+              type: number
+            bandwidth:
+              type: number
+            users:
+              type: number
+        features:
+          type: array
+          items:
+            type: string
+      if:
+        properties:
+          type:
+            const: "premium"
+      then:
+        properties:
+          limits:
+            properties:
+              storage:
+                minimum: 100
+              bandwidth:
+                minimum: 1000
+          features:
+            contains:
+              const: "priority-support"
+      else:
+        if:
+          properties:
+            type:
+              const: "enterprise"
+        then:
+          properties:
+            limits:
+              properties:
+                storage:
+                  minimum: 1000
+                bandwidth:
+                  minimum: 10000
+            features:
+              contains:
+                const: "dedicated-support"
+        else:
+          properties:
+            limits:
+              properties:
+                storage:
+                  maximum: 10
+                bandwidth:
+                  maximum: 100
+      required: ['type', 'name']
+
+    # Enhanced discriminator with mapping
+    Notification:
+      type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          email: '#/components/schemas/EmailNotification'
+          sms: '#/components/schemas/SmsNotification'
+          push: '#/components/schemas/PushNotification'
+          webhook: '#/components/schemas/WebhookNotification'
+      oneOf:
+        - $ref: '#/components/schemas/EmailNotification'
+        - $ref: '#/components/schemas/SmsNotification'
+        - $ref: '#/components/schemas/PushNotification'
+        - $ref: '#/components/schemas/WebhookNotification'
+      required:
+        - type
+        - timestamp
+
+    EmailNotification:
+      type: object
+      properties:
+        type:
+          const: "email"
+        timestamp:
+          type: string
+          format: date-time
+        recipient:
+          type: string
+          format: email
+        subject:
+          type: string
+        body:
+          type: string
+        attachments:
+          type: ["array", "null"]
+          items:
+            type: object
+            properties:
+              filename:
+                type: string
+              contentType:
+                type: string
+              size:
+                type: number
+      required: ['type', 'timestamp', 'recipient', 'subject', 'body']
+
+    SmsNotification:
+      type: object
+      properties:
+        type:
+          const: "sms"
+        timestamp:
+          type: string
+          format: date-time
+        phoneNumber:
+          type: string
+          pattern: '^\+[1-9]\d{1,14}$'
+        message:
+          type: string
+          maxLength: 160
+        countryCode:
+          type: ["string", "null"]
+      required: ['type', 'timestamp', 'phoneNumber', 'message']
+
+    PushNotification:
+      type: object
+      properties:
+        type:
+          const: "push"
+        timestamp:
+          type: string
+          format: date-time
+        deviceId:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        badge:
+          type: ["number", "null"]
+        sound:
+          type: ["string", "null"]
+        data:
+          type: ["object", "null"]
+          additionalProperties: true
+      required: ['type', 'timestamp', 'deviceId', 'title', 'body']
+
+    WebhookNotification:
+      type: object
+      properties:
+        type:
+          const: "webhook"
+        timestamp:
+          type: string
+          format: date-time
+        url:
+          type: string
+          format: uri
+        method:
+          type: string
+          enum: ["POST", "PUT", "PATCH"]
+        headers:
+          type: ["object", "null"]
+          additionalProperties:
+            type: string
+        payload:
+          type: ["object", "array", "string", "null"]
+        retryCount:
+          type: number
+          minimum: 0
+          maximum: 5
+      required: ['type', 'timestamp', 'url', 'method']
+
+    # Discriminator without explicit mapping (inferred)
+    Vehicle:
+      type: object
+      discriminator:
+        propertyName: vehicleType
+      anyOf:
+        - $ref: '#/components/schemas/Car'
+        - $ref: '#/components/schemas/Motorcycle'
+        - $ref: '#/components/schemas/Bicycle'
+        - $ref: '#/components/schemas/Truck'
+      required:
+        - vehicleType
+
+    Car:
+      type: object
+      properties:
+        vehicleType:
+          const: "Car"
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: number
+          minimum: 1900
+          maximum: 2030
+        doors:
+          type: number
+          enum: [2, 4, 5]
+        fuelType:
+          type: string
+          enum: ["gasoline", "diesel", "electric", "hybrid"]
+        features:
+          type: ["array", "null"]
+          items:
+            type: string
+      required: ['vehicleType', 'make', 'model', 'year']
+
+    Motorcycle:
+      type: object
+      properties:
+        vehicleType:
+          const: "Motorcycle"
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: number
+          minimum: 1900
+          maximum: 2030
+        engineSize:
+          type: number
+          minimum: 50
+          maximum: 2000
+        type:
+          type: string
+          enum: ["sport", "cruiser", "touring", "dirt", "scooter"]
+      required: ['vehicleType', 'make', 'model', 'year', 'engineSize']
+
+    Bicycle:
+      type: object
+      properties:
+        vehicleType:
+          const: "Bicycle"
+        brand:
+          type: string
+        model:
+          type: ["string", "null"]
+        gears:
+          type: number
+          minimum: 1
+          maximum: 30
+        isElectric:
+          type: boolean
+        type:
+          type: string
+          enum: ["road", "mountain", "hybrid", "bmx", "folding"]
+      required: ['vehicleType', 'brand', 'gears', 'isElectric']
+
+    Truck:
+      type: object
+      properties:
+        vehicleType:
+          const: "Truck"
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: number
+          minimum: 1900
+          maximum: 2030
+        maxWeight:
+          type: number
+          minimum: 1000
+        axles:
+          type: number
+          minimum: 2
+          maximum: 8
+        trailerCapacity:
+          type: ["number", "null"]
+      required: ['vehicleType', 'make', 'model', 'year', 'maxWeight', 'axles']
+
+    # UnevaluatedProperties
+    ExtensibleUser:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      allOf:
+        - type: object
+          properties:
+            email:
+              type: string
+              format: email
+        - type: object
+          properties:
+            phone:
+              type: ["string", "null"]
+      unevaluatedProperties:
+        type: string
+        description: "Additional string properties are allowed"
+      required: ['id', 'name']
+
+    # Contains keyword for arrays
+    TaggedContent:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+          contains:
+            const: "published"
+          minContains: 1
+          description: "Must contain at least one 'published' tag"
+        categories:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              priority:
+                type: number
+          contains:
+            type: object
+            properties:
+              priority:
+                minimum: 5
+            required: ['priority']
+          maxContains: 3
+          description: "Can contain at most 3 high-priority categories"
+      required: ['id', 'title', 'tags']
+
+    # Complex nested structure with multiple 3.1 features
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: ["pending", "processing", "shipped", "delivered", "cancelled"]
+        customer:
+          $ref: '#/components/schemas/User'
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: string
+              quantity:
+                type: number
+                minimum: 1
+              price:
+                type: ["number", "null"]
+              metadata:
+                type: ["object", "null"]
+                unevaluatedProperties: true
+            required: ['productId', 'quantity']
+          minItems: 1
+        shipping:
+          type: ["object", "null"]
+          properties:
+            address:
+              type: array
+              prefixItems:
+                - type: string
+                  description: "Street address"
+                - type: string
+                  description: "City"
+                - type: string
+                  description: "State/Province"
+                - type: string
+                  description: "Postal code"
+                - type: string
+                  description: "Country"
+              items: false
+            method:
+              type: string
+              enum: ["standard", "express", "overnight"]
+            cost:
+              type: ["number", "null"]
+          if:
+            properties:
+              method:
+                const: "overnight"
+          then:
+            properties:
+              cost:
+                minimum: 25
+          required: ['address', 'method']
+        payment:
+          type: object
+          discriminator:
+            propertyName: method
+          oneOf:
+            - $ref: '#/components/schemas/CreditCardPayment'
+            - $ref: '#/components/schemas/PayPalPayment'
+            - $ref: '#/components/schemas/BankTransferPayment'
+          required: ['method']
+        total:
+          type: number
+          minimum: 0
+        currency:
+          const: "USD"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: ["string", "null"]
+          format: date-time
+      required: ['id', 'status', 'customer', 'items', 'total', 'currency', 'createdAt']
+
+    CreditCardPayment:
+      type: object
+      properties:
+        method:
+          const: "credit_card"
+        cardNumber:
+          type: string
+          pattern: '^[0-9]{13,19}$'
+        expiryMonth:
+          type: number
+          minimum: 1
+          maximum: 12
+        expiryYear:
+          type: number
+          minimum: 2024
+        cvv:
+          type: string
+          pattern: '^[0-9]{3,4}$'
+        holderName:
+          type: string
+      required: ['method', 'cardNumber', 'expiryMonth', 'expiryYear', 'cvv', 'holderName']
+
+    PayPalPayment:
+      type: object
+      properties:
+        method:
+          const: "paypal"
+        email:
+          type: string
+          format: email
+        transactionId:
+          type: ["string", "null"]
+      required: ['method', 'email']
+
+    BankTransferPayment:
+      type: object
+      properties:
+        method:
+          const: "bank_transfer"
+        accountNumber:
+          type: string
+        routingNumber:
+          type: string
+        bankName:
+          type: string
+        reference:
+          type: ["string", "null"]
+      required: ['method', 'accountNumber', 'routingNumber', 'bankName']
+
+    # Webhook event schemas
+    UserCreatedEvent:
+      type: object
+      properties:
+        eventType:
+          const: "user.created"
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          $ref: '#/components/schemas/User'
+        metadata:
+          type: object
+          properties:
+            source:
+              type: string
+            version:
+              const: "1.0"
+          required: ['source', 'version']
+      required: ['eventType', 'timestamp', 'data', 'metadata']
+
+    OrderUpdatedEvent:
+      type: object
+      properties:
+        eventType:
+          const: "order.updated"
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          properties:
+            orderId:
+              type: string
+            previousStatus:
+              type: string
+            newStatus:
+              type: string
+            changes:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  oldValue:
+                    type: ["string", "number", "boolean", "null"]
+                  newValue:
+                    type: ["string", "number", "boolean", "null"]
+                required: ['field']
+          required: ['orderId', 'newStatus']
+        metadata:
+          type: object
+          properties:
+            source:
+              type: string
+            version:
+              const: "1.0"
+            triggeredBy:
+              type: ["string", "null"]
+          required: ['source', 'version']
+      required: ['eventType', 'timestamp', 'data', 'metadata']
+
+    WebhookResponse:
+      type: object
+      properties:
+        received:
+          const: true
+        timestamp:
+          type: string
+          format: date-time
+        processedBy:
+          type: string
+      required: ['received', 'timestamp', 'processedBy']
+
+    # Collection types
+    UserList:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        pagination:
+          type: object
+          properties:
+            page:
+              type: number
+              minimum: 1
+            limit:
+              type: number
+              minimum: 1
+              maximum: 100
+            total:
+              type: number
+              minimum: 0
+            hasNext:
+              type: boolean
+          required: ['page', 'limit', 'total', 'hasNext']
+        filters:
+          type: ["object", "null"]
+          properties:
+            isActive:
+              type: ["boolean", "null"]
+            tags:
+              type: ["array", "null"]
+              items:
+                type: string
+              contains:
+                type: string
+                minLength: 1
+          unevaluatedProperties: false
+      required: ['users', 'pagination']
+
+    # Error response with const and conditional logic
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          const: true
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: ["object", "array", "null"]
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: ["string", "null"]
+      if:
+        properties:
+          code:
+            enum: ["VALIDATION_ERROR", "INVALID_INPUT"]
+      then:
+        properties:
+          details:
+            type: object
+            properties:
+              field:
+                type: string
+              value:
+                type: ["string", "number", "boolean", "null"]
+              constraint:
+                type: string
+            required: ['field', 'constraint']
+      else:
+        if:
+          properties:
+            code:
+              const: "RATE_LIMITED"
+        then:
+          properties:
+            details:
+              type: object
+              properties:
+                retryAfter:
+                  type: number
+                  minimum: 1
+                limit:
+                  type: number
+                remaining:
+                  type: number
+              required: ['retryAfter', 'limit', 'remaining']
+      required: ['error', 'code', 'message', 'timestamp']

@@ -12,6 +12,7 @@ export interface ParsedSchema {
 	json: string;
 	definitions: Record<string, JSONSchema>;
 	whitelistedDecoders: string[] | undefined;
+	webhooks?: Record<string, any>;
 }
 
 export async function parseSchema(

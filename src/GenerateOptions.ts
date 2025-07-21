@@ -18,6 +18,27 @@ export interface StandaloneOptions {
   validatorOutput: ValidatorOutput;
 }
 
+export interface OpenAPI31ParseOptions {
+  /** Enable webhook processing */
+  enableWebhooks?: boolean;
+  /** Strict null handling for type arrays */
+  strictNullHandling?: boolean;
+  /** Enable conditional schemas (if/then/else) */
+  enableConditionalSchemas?: boolean;
+  /** Enable prefixItems keyword support */
+  enablePrefixItems?: boolean;
+  /** Enable unevaluatedProperties keyword support */
+  enableUnevaluatedProperties?: boolean;
+  /** Enable const keyword support */
+  enableConstKeyword?: boolean;
+  /** Enable contains keyword support */
+  enableContainsKeyword?: boolean;
+  /** Enable enhanced discriminator support */
+  enableEnhancedDiscriminator?: boolean;
+  /** Fallback to OpenAPI 3.0 processing if 3.1 fails */
+  fallbackToOpenAPI30?: boolean;
+}
+
 export interface GenerateOptions {
   /** file location of the schema */
   schemaFile: string;
@@ -78,4 +99,9 @@ export interface GenerateOptions {
   esm?: boolean;
 
   debug?: boolean;
+
+  /**
+   * OpenAPI 3.1 specific parsing options
+   */
+  openapi31?: OpenAPI31ParseOptions;
 }
