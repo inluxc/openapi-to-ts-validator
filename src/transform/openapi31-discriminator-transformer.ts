@@ -185,7 +185,7 @@ function processInheritanceDiscriminator(
   if (!transformed.required) {
     transformed.required = [];
   }
-  if (!transformed.required.includes(propertyName)) {
+  if (Array.isArray(transformed.required) && !transformed.required.includes(propertyName)) {
     transformed.required.push(propertyName);
   }
 
@@ -314,7 +314,7 @@ function enhanceUnionSchemasWithDiscriminator(
       if (!enhanced.required) {
         enhanced.required = [];
       }
-      if (!enhanced.required.includes(propertyName)) {
+      if (Array.isArray(enhanced.required) && !enhanced.required.includes(propertyName)) {
         enhanced.required.push(propertyName);
       }
     }

@@ -333,7 +333,9 @@ function processParameters(parameters: any[]): JSONSchema | null {
         if (!parametersSchema.required) {
           parametersSchema.required = [];
         }
-        parametersSchema.required.push(parameter.name);
+        if (Array.isArray(parametersSchema.required)) {
+          parametersSchema.required.push(parameter.name);
+        }
       }
     } catch (error) {
       console.warn(`Failed to process parameter ${parameter.name}:`, error);
@@ -384,7 +386,9 @@ function processHeaders(headers: any): JSONSchema | null {
         if (!headersSchema.required) {
           headersSchema.required = [];
         }
-        headersSchema.required.push(headerName);
+        if (Array.isArray(headersSchema.required)) {
+          headersSchema.required.push(headerName);
+        }
       }
     } catch (error) {
       console.warn(`Failed to process header ${headerName}:`, error);

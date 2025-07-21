@@ -116,9 +116,9 @@ async function analyzeMemoryUsage(): Promise<{
   const testSchema = {
     type: 'object',
     properties: {
-      test: { type: ['string', 'null'] }
+      test: { type: ['string', 'null'] as any }
     }
-  };
+  } as any;
   
   for (let i = 0; i < 100; i++) {
     transformer.transformSchema(testSchema, { version: '3.1.0', major: 3, minor: 1, isVersion31: true, isVersion30: false });

@@ -35,7 +35,7 @@ export function transformConstKeyword(schema: JSONSchema): ConstTransformResult 
 
     // Ensure the schema has the correct type for the const value
     if (!transformed.type) {
-      transformed.type = inferTypeFromValue(constValue);
+      transformed.type = inferTypeFromValue(constValue) as any;
     }
 
     // For better TypeScript literal type generation, we can also add an enum with single value
@@ -354,7 +354,7 @@ export function createConstSchema(value: any, additionalProperties: Partial<JSON
   
   return {
     const: value,
-    type: inferTypeFromValue(value),
+    type: inferTypeFromValue(value) as any,
     enum: [value], // Add enum for better TypeScript literal type generation
     ...additionalProperties
   };

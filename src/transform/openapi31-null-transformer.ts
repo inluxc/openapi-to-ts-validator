@@ -43,21 +43,21 @@ export function transformNullTypes(schema: JSONSchema): NullTypeTransformResult 
         
         if (nonNullTypes.length === 1) {
           // Simple case: one type + null (e.g., ["string", "null"])
-          transformed.type = nonNullTypes[0];
+          transformed.type = nonNullTypes[0] as any;
           // Add nullable flag for compatibility with some tools
           (transformed as any).nullable = true;
         } else {
           // Complex case: multiple types + null (e.g., ["string", "number", "null"])
           delete transformed.type;
           transformed.anyOf = [
-            ...nonNullTypes.map(type => ({ type })),
-            { type: 'null' }
+            ...nonNullTypes.map(type => ({ type: type as any })),
+            { type: 'null' as any }
           ];
         }
       } else {
         // No null type, just multiple types (e.g., ["string", "number"])
         delete transformed.type;
-        transformed.anyOf = typeArray.map(type => ({ type }));
+        transformed.anyOf = typeArray.map(type => ({ type: type as any }));
       }
       
       wasTransformed = true;
@@ -73,8 +73,8 @@ export function transformNullTypes(schema: JSONSchema): NullTypeTransformResult 
     // Remove nullable property and use anyOf instead
     delete transformed.nullable;
     transformed.anyOf = [
-      { type: originalType },
-      { type: 'null' }
+      { type: originalType as any },
+      { type: 'null' as any }
     ];
     delete transformed.type;
     

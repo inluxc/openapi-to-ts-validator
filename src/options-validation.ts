@@ -61,7 +61,7 @@ export function validateAndNormalizeOpenAPI31Options(
     if (value !== undefined) {
       if (typeof value !== 'boolean') {
         throw new OptionsValidationError(
-          option,
+          String(option),
           value,
           'Must be a boolean value (true or false)'
         );
